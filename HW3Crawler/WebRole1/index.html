@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CR4WL3R</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+</head>
+<body>
+    <button id="start">START Crawling</button>
+    <button id="stop">STOP Crawling</button>
+    <p> Status: <span id="status"> </span></p>
+
+    <h2>Last Ten Crawled:</h2>
+    <button id="fetchLastTen_button">Fetch Last 10 Crawled</button>
+    <div id="results"></div>
+
+    <h2>Performance: </h2>
+    <button id="performance_button">Fetch Performance</button>
+    <div id="performance_results"></div>
+
+</body>
+<script>
+
+    $(document).ready(function () {
+        // run the first time; all subsequent calls will take care of themselves
+        setInterval(performanceRequest, 1000);
+        setInterval(fetchLastTenRequest, 5000);
+        setInterval(updateStatus, 2000);
+    });
+
+    var fetchLastTenButton = document.getElementById('fetchLastTen_button');
+    var performanceButton = document.getElementById('performance_button');
+    var startButton = document.getElementById('start');
+    var stopButton = document.getElementById('stop');
+
+    fetchLastTenButton.addEventListener('click', function () {
+        fetchLastTenRequest();
+    })
+
+    performanceButton.addEventListener('click', function () {
+        performanceRequest();
+    })
+
+    startButton.addEventListener('click', function () {
+        startRequest();
+    })
+
+    stopButton.addEventListener('click', function () {
+        stopRequest();
+    })
+
+    //function to update status
+    function updateStatus() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetStatus",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                $('#status').text(eval(msg)["d"].replace(/['"]+/g, ''));
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to start
+    function startRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/StartCrawl",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("STARTED!");
+               
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to stop
+    function stopRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/StopCrawl",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("STOPPED!");
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send performance request
+    function performanceRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetPerformance",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#performance_results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#performance_results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#performance_results").append("<p>" + index.toString() + ". " + eval(msg)["d"][i] + "</p>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send the ajax request and append the data appropriately
+    function fetchLastTenRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetLast10Added",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#results").append(index.toString() + ". " + "<a target='_blank' href= '" + eval(msg)["d"][i] + "'>"  + eval(msg)["d"][i] + "</p>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+</script>
+</html>
