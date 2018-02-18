@@ -74,7 +74,7 @@ namespace WorkerRole1
 
         }
 
-        private bool isRespondingweb(string url)
+        private bool isRespondingWebsite(string url)
         {
 
             try
@@ -83,20 +83,24 @@ namespace WorkerRole1
                 //Add checks for 200 code here
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
                 webRequest.AllowAutoRedirect = false;
+                webRequest.Method = "HEAD";
 
                 //website is valid
                 using (HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse())
                 {
 
                     // Do your processings here....
-                    int responseCode = (int)response.StatusCode;
+                    var responseCode = response.StatusCode;
                     //System.Diagnostics.Debug.WriteLine("Response: " + responseCode);
-                    if (responseCode == 200)
+                    response.Close();
+
+                    if (responseCode == HttpStatusCode.OK)
                     {
                         return true;
                     }
                     else
                     {
+                        System.Diagnostics.Debug.WriteLine("<------ ERROR FOUND HERE ------>");
                         ClassLibrary1.Error newErr = new ClassLibrary1.Error(url, ("Error: Response Code " + responseCode + " on request!"));
                         TableOperation insertOperation = TableOperation.Insert(newErr);
                         DBManager.getErrorsTable().Execute(insertOperation);
@@ -107,6 +111,7 @@ namespace WorkerRole1
             }
             catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine("<------ ERROR FOUND HERE ------>");
                 ClassLibrary1.Error newErr = new ClassLibrary1.Error(url, e.Message);
                 TableOperation insertOperation = TableOperation.Insert(newErr);
                 DBManager.getErrorsTable().Execute(insertOperation);
@@ -131,7 +136,7 @@ namespace WorkerRole1
 
         public void scanURL(string url)
         {
-            if (isRespondingweb(url) && statusCheck())
+            if (isRespondingWebsite(url) && statusCheck())
             {
                 try
                 {
@@ -331,7 +336,7 @@ namespace WorkerRole1
                                             //Add checks for ending in html here
                                             if (link.Contains(".html") || link.Contains(".htm"))
                                             {
-                                                if (isRespondingweb(link))
+                                                if (isRespondingWebsite(link))
                                                 {
                                                     // System.Diagnostics.Debug.WriteLine("Checkpoint4: " + link);
                                                     //System.Diagnostics.Debug.WriteLine("Link Parsed: " + link + " published on " + publishedOn);
@@ -394,12 +399,12 @@ namespace WorkerRole1
                 System.Diagnostics.Debug.WriteLine("Message Found :" + msg.AsString);
                 if (msg.AsString.Equals("Stopped"))
                 {
-                    System.Diagnostics.Debug.WriteLine("<------ STOPPED -------->");
+                    //System.Diagnostics.Debug.WriteLine("<------ STOPPED -------->");
                     return false;
                 }
                 else if (msg.AsString.Equals("Started"))
                 {
-                    System.Diagnostics.Debug.WriteLine("<------ STARTED -------->");
+                    //System.Diagnostics.Debug.WriteLine("<------ STARTED -------->");
                     return true;
                 }
 

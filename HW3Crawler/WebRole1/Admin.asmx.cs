@@ -3,6 +3,7 @@ using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Script.Serialization;
@@ -69,21 +70,15 @@ namespace WebRole1
         private void UpdateStatus(string newStatus)
         {
             CloudQueueMessage msg = DBManager.getStatusQueue().PeekMessage();
-            try
-            {
-                System.Diagnostics.Debug.WriteLine("Msg content: " + msg);
-                System.Diagnostics.Debug.WriteLine("Found message in ASMX: " + msg.AsString);
-            }
-            catch { }
             
             if (msg != null)
             { 
-                System.Diagnostics.Debug.WriteLine("Found message in ASMX: " + msg.AsString);
+                //System.Diagnostics.Debug.WriteLine("Found message in ASMX: " + msg.AsString);
                 DBManager.getStatusQueue().Clear();
             }
             
 
-            System.Diagnostics.Debug.WriteLine("Msg found to be null");
+            //System.Diagnostics.Debug.WriteLine("Msg found to be null");
             System.Diagnostics.Debug.WriteLine(newStatus);
             CloudQueueMessage nStatus = new CloudQueueMessage(newStatus);
             DBManager.getStatusQueue().AddMessage(nStatus);
@@ -122,10 +117,10 @@ namespace WebRole1
             var q = DBManager.getResultsTable().ExecuteQuery(rangeQuery);
 
 
-            System.Diagnostics.Debug.WriteLine("===== LIST =====");
+            //System.Diagnostics.Debug.WriteLine("===== LIST =====");
             foreach (var item in q.Take(10))
             {
-                System.Diagnostics.Debug.WriteLine(item.Address);
+                //System.Diagnostics.Debug.WriteLine(item.Address);
                 returnList.Add(item.Address);
             }
             return returnList;
@@ -146,11 +141,34 @@ namespace WebRole1
             var q = DBManager.getPerformanceTable().ExecuteQuery(rangeQuery);
 
 
-            System.Diagnostics.Debug.WriteLine("===== PERFORMANCE LIST =====");
+            //System.Diagnostics.Debug.WriteLine("===== PERFORMANCE LIST =====");
             foreach (var item in q.Take(10))
             {
-                System.Diagnostics.Debug.WriteLine("CPU: " + item.CPU + " --- Memory: " + item.Memory);
+                //System.Diagnostics.Debug.WriteLine("CPU: " + item.CPU + " --- Memory: " + item.Memory);
                 returnList.Add("CPU: " + item.CPU.ToString() + " --- Memory: " + item.Memory.ToString());
+            }
+            return returnList;
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public List<String> GetPerformanceChartData()
+        {
+            TableQuery<PerformanceStat> rangeQuery = new TableQuery<PerformanceStat>()
+                .Where(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.NotEqual, " ")
+                    );
+
+            List<String> returnList = new List<String>();
+
+            var q = DBManager.getPerformanceTable().ExecuteQuery(rangeQuery);
+
+
+            //System.Diagnostics.Debug.WriteLine("===== PERFORMANCE LIST =====");
+            foreach (var item in q.Take(10))
+            {
+                //System.Diagnostics.Debug.WriteLine("CPU: " + item.CPU + " --- Memory: " + item.Memory);
+                returnList.Add(item.CPU.ToString() + "|" + item.Memory.ToString());
             }
             return returnList;
         }

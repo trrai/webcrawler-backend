@@ -1,9 +1,17 @@
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Emulator config file set to C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] DiagnosticsStoreRootPath set to: C:\Users\Tej\AppData\Local\dftmp\Resources\81f93bac-3fc9-4b44-b1fa-9139e3bde294
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Loading config file: C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Config file to read: C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Checking VM Type
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Emulator config file set to C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Extension set to Emulator Mode
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Reading XML configuration file
-DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 7:35:16 AM] Bypassing private config decryption
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Emulator config file set to C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] DiagnosticsStoreRootPath set to: C:\Users\Tej\AppData\Local\dftmp\Resources\fc750b05-fbf7-48d4-a885-67f962926152
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Loading config file: C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Config file to read: C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Checking VM Type
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Emulator config file set to C:\Users\Tej\Source\Repos\HW3Crawler\HW3Crawler\csx\Debug\roles\WorkerRole1\approot\diagnostics.wadcfgx
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Extension set to Emulator Mode
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Reading XML configuration file
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Bypassing private config decryption
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Stopping the running plugin, if any
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] No DiagnosticsPlugin is running.
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:46 PM] Killing any DiagnosticsPlugin that might remain.
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:47 PM] Killing any MonAgentHost that might remain.
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:47 PM] Diagnostics plugin stopped successfully
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:36:47 PM] Resetting DiagnosticPlugin
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:37:57 PM] DiagnosticsPlugin launched successfully with new configuration
+DiagnosticsPluginLauncher.exe Information: 0 : [2/17/2018 11:37:57 PM] DiagnosticPlugin exited with code 0

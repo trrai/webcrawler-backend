@@ -12,7 +12,7 @@ namespace ClassLibrary1
         public Error(string link, string error)
         {
 
-            this.PartitionKey = link;
+            this.PartitionKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString();
             this.Link = link;
             this.ErrorMsg = error;
             this.RowKey = Guid.NewGuid().ToString();
