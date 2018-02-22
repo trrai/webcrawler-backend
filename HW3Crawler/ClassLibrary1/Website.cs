@@ -18,10 +18,18 @@ namespace ClassLibrary1
             this.RowKey = Guid.NewGuid().ToString();
         }
 
+        public Website(int count)
+        {
+            this.PartitionKey = "COUNT";
+            this.Count = count;
+            this.RowKey = "COUNT";
+        }
+
         public Website() { }
         public string Name { get; set; }
         public string Date { get; set; }
         public string Address { get; set; }
+        public int Count { get; set; }
     }
 }
 

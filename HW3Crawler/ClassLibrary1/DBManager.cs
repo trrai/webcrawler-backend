@@ -19,7 +19,7 @@ namespace ClassLibrary1
         public static CloudQueue getUrlQueue()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             CloudQueue queue = queueClient.GetQueueReference("urls");
             queue.CreateIfNotExists();
@@ -30,7 +30,7 @@ namespace ClassLibrary1
         public static CloudQueue getDataQueue()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             CloudQueue queue = queueClient.GetQueueReference("data");
             queue.CreateIfNotExists();
@@ -41,7 +41,7 @@ namespace ClassLibrary1
         public static CloudQueue getStatusQueue()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             CloudQueue queue = queueClient.GetQueueReference("status");
             queue.CreateIfNotExists();
@@ -52,7 +52,7 @@ namespace ClassLibrary1
         public static CloudTable getResultsTable()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                 ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                 ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference("results");
             table.CreateIfNotExists();
@@ -63,7 +63,7 @@ namespace ClassLibrary1
         public static CloudTable getErrorsTable()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                 ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                 ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference("errors");
             table.CreateIfNotExists();
@@ -74,7 +74,7 @@ namespace ClassLibrary1
         public static CloudTable getPerformanceTable()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                 ConfigurationManager.AppSettings["StorageConnectionString2"]);
+                 ConfigurationManager.AppSettings["StorageConnectionString"]);
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference("performance");
             table.CreateIfNotExists();

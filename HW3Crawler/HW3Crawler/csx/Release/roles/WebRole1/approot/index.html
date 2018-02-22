@@ -2,9 +2,412 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title></title>
+    <title>CR4WL3R</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
 </head>
 <body>
+    <div class="container" style="margin:15px; width: 100%;">
+        <row>
+            <button id="start" class="btn btn-success">START Crawling</button>
+            <button id="stop" class="btn btn-danger">STOP Crawling</button>
+            <h3> Status: <span id="status" class="label label-primary"> </span></h3>
+            <h3> Queue Count: <span id="queue_count" class="label label-default"></span></h3>
+            <h3> Table Count: <span id="table_count" class="label label-default"></span></h3>
+        </row>
+
+        <row>
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Last Ten Crawled:</h2>
+                <button id="fetchLastTen_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Last 10 Crawled</button>
+                <ul id="results" class="list-group"></ul>
+            </div>
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Performance: </h2>
+                <button id="performance_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Performance</button>
+                <ul id="performance_results" class="list-group"></ul>
+            </div>
+
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Errors: </h2>
+                <button id="errors_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Errors</button>
+                <ul id="error_results" class="list-group"></ul>
+            </div>
+
+        </row>
+
+        <div class="row">
+            <div class="col-12">
+                <h2> Performance Chart: </h2>
+                <button id="update_chart" class="btn btn-info" style="padding: 10px; margin: 10px;">Update Chart</button>
+                <div style="width:90%;height:75%">
+                    <canvas id="myChart" style="padding: 0;margin: auto;display: block; "> </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
+<script>
+
+    $(document).ready(function () {
+        // run the first time; all subsequent calls will take care of themselves
+        performanceRequest();
+        fetchLastTenRequest();
+        errorRequest();
+        makeChart();
+        countRequest();
+
+        setInterval(performanceRequest, 1000);
+        setInterval(fetchLastTenRequest, 5000);
+        setInterval(errorRequest, 5000);
+        setInterval(updateStatus, 2000);
+        setInterval(countRequest, 1000);
+        
+        
+    });
+
+    var fetchLastTenButton = document.getElementById('fetchLastTen_button');
+    var performanceButton = document.getElementById('performance_button');
+    var startButton = document.getElementById('start');
+    var stopButton = document.getElementById('stop');
+    var updateChartButton = document.getElementById('update_chart');
+    var errorsButton = document.getElementById('errors_button');
+
+    fetchLastTenButton.addEventListener('click', function () {
+        fetchLastTenRequest();
+    });
+
+    performanceButton.addEventListener('click', function () {
+        performanceRequest();
+    });
+
+    errorsButton.addEventListener('click', function () {
+        errorRequest();
+    });
+
+    startButton.addEventListener('click', function () {
+        startRequest();
+    })
+
+    stopButton.addEventListener('click', function () {
+        stopRequest();
+    })
+
+    updateChartButton.addEventListener('click', function () {
+        updateChart();
+    })
+    var cpuInitData = [];
+    var memInitData = [];
+
+    function countRequest() {
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetCount",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#count_stats").text("No Count Found... Please wait")
+                }
+                //otherwise append the results found
+                else {
+                    var stats = eval(msg)["d"].replace(/['"]+/g, '').split("|");
+                    $('#queue_count').text(stats[0]);
+                    $('#table_count').text(stats[1]);
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    }
+    //function to update chart
+    function updateChart() {
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetPerformanceChartData",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#myChart").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    console.log("Updating chart..");
+                    var cpuData = [];
+                    var memData = [];
+                    for (var i in eval(msg)["d"]) {
+                        var stats = eval(msg)["d"][i].split("|");
+                        cpuData.push(stats[0]);
+                        memData.push(stats[1] / 100);
+                    }
+
+                    config.data.datasets = [{
+                        label: "CPU",
+                        backgroundColor: '#FF0000',
+                        borderColor: '#FF0000',
+                        data: cpuData,
+                        fill: false,
+                    }, {
+                        label: "RAM",
+                        fill: false,
+                        backgroundColor: '#008000',
+                        borderColor: '#008000',
+                        data: memData,
+                    }];
+
+                    window.myLineChart.update();
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    }
+    var config = {
+        type: 'line',
+        data: {
+            labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            datasets: [{
+                label: "CPU",
+                backgroundColor: '#FF0000',
+                borderColor: '#FF0000',
+                data: cpuInitData,
+                fill: false,
+            }, {
+                label: "RAM",
+                fill: false,
+                backgroundColor: '#008000',
+                borderColor: '#008000',
+                data: memInitData,
+            }]
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Performance'
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        fontSize: 18,
+                        labelString: 'Time Interval'
+                    },
+                    ticks: {
+                        fontSize: 15
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        fontSize: 18,
+                        labelString: 'Value (RAM x100)'
+                    },
+                    ticks: {
+                        fontSize: 15
+                    }
+
+                }]
+            }
+        }
+    };
+    //function to create chart
+    function makeChart() {
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetPerformanceChartData",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#myChart").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    
+                    for (var i in eval(msg)["d"]) {
+                        var stats = eval(msg)["d"][i].split("|");
+                        cpuInitData.push(stats[0]);
+                        memInitData.push(stats[1]/100);
+                    }
+
+                    var ctx = document.getElementById("myChart").getContext("2d");
+                    window.myLineChart = new Chart(ctx, config);
+
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    }
+    //function to update status
+    function updateStatus() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetStatus",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                $('#status').text(eval(msg)["d"].replace(/['"]+/g, ''));
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to start
+    function startRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/StartCrawl",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("STARTED!");
+               
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to stop
+    function stopRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/StopCrawl",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("STOPPED!");
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send performance request
+    function performanceRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetPerformance",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#performance_results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#performance_results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#performance_results").append("<li class='list-group-item'>" + eval(msg)["d"][i] + "</li>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send errors table request
+    function errorRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetErrors",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#error_results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#error_results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#error_results").append("<li class='list-group-item'>" + eval(msg)["d"][i] + "</li>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send the ajax request and append the data appropriately
+    function fetchLastTenRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetLast10Added",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#results").append("<li class='list-group-item'>" + index.toString() + ". " +
+                            "<a target='_blank' href= '" + eval(msg)["d"][i] + "'>" + eval(msg)["d"][i] + "</li>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+</script>
 </html>

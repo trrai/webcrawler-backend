@@ -11,21 +11,44 @@
 
 </head>
 <body>
-    <button id="start" class="btn btn-success">START Crawling</button>
-    <button id="stop" class="btn btn-danger">STOP Crawling</button>
-    <h2> Status: <span id="status" class="label label-primary"> </span></h2>
+    <div class="container" style="margin:15px; width: 100%;">
+        <row>
+            <button id="start" class="btn btn-success">START Crawling</button>
+            <button id="stop" class="btn btn-danger">STOP Crawling</button>
+            <h3> Status: <span id="status" class="label label-primary"> </span></h3>
+            <h3> Queue Count: <span id="queue_count" class="label label-default"></span></h3>
+            <h3> Table Count: <span id="table_count" class="label label-default"></span></h3>
+        </row>
 
-    <h2>Last Ten Crawled:</h2>
-    <button id="fetchLastTen_button" class="btn btn-info">Fetch Last 10 Crawled</button>
-    <ul id="results" class="list-group"></ul>
+        <row>
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Last Ten Crawled:</h2>
+                <button id="fetchLastTen_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Last 10 Crawled</button>
+                <ul id="results" class="list-group"></ul>
+            </div>
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Performance: </h2>
+                <button id="performance_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Performance</button>
+                <ul id="performance_results" class="list-group"></ul>
+            </div>
 
-    <h2>Performance: </h2>
-    <button id="performance_button" class="btn btn-info">Fetch Performance</button>
-    <ul id="performance_results" class="list-group"></ul>
+            <div class="col-4" style="display: inline-block; width: 33%; vertical-align: top;">
+                <h2>Errors: </h2>
+                <button id="errors_button" class="btn btn-info" style="padding: 10px; margin: 10px;">Fetch Errors</button>
+                <ul id="error_results" class="list-group"></ul>
+            </div>
 
-    <button id="update_chart" class="btn btn-info">Update Chart</button>
-    <div style="width:75%;height:75%">
-        <canvas id="myChart" style="padding: 0;margin: auto;display: block; "> </canvas>
+        </row>
+
+        <div class="row">
+            <div class="col-12">
+                <h2> Performance Chart: </h2>
+                <button id="update_chart" class="btn btn-info" style="padding: 10px; margin: 10px;">Update Chart</button>
+                <div style="width:90%;height:75%">
+                    <canvas id="myChart" style="padding: 0;margin: auto;display: block; "> </canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>
@@ -33,26 +56,42 @@
 
     $(document).ready(function () {
         // run the first time; all subsequent calls will take care of themselves
+        performanceRequest();
+        fetchLastTenRequest();
+        errorRequest();
+        makeChart();
+        countRequest();
+
+        //refresh automatically every X seconds
         setInterval(performanceRequest, 1000);
         setInterval(fetchLastTenRequest, 5000);
+        setInterval(errorRequest, 5000);
         setInterval(updateStatus, 2000);
-        makeChart();
+        setInterval(countRequest, 1000);
+        
         
     });
 
+    //Get buttons 
     var fetchLastTenButton = document.getElementById('fetchLastTen_button');
     var performanceButton = document.getElementById('performance_button');
     var startButton = document.getElementById('start');
     var stopButton = document.getElementById('stop');
     var updateChartButton = document.getElementById('update_chart');
+    var errorsButton = document.getElementById('errors_button');
 
+    //Add listeners
     fetchLastTenButton.addEventListener('click', function () {
         fetchLastTenRequest();
-    })
+    });
 
     performanceButton.addEventListener('click', function () {
         performanceRequest();
-    })
+    });
+
+    errorsButton.addEventListener('click', function () {
+        errorRequest();
+    });
 
     startButton.addEventListener('click', function () {
         startRequest();
@@ -65,6 +104,35 @@
     updateChartButton.addEventListener('click', function () {
         updateChart();
     })
+    var cpuInitData = [];
+    var memInitData = [];
+
+    //function to get the current counts of queue and table
+    function countRequest() {
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetCount",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#count_stats").text("No Count Found... Please wait")
+                }
+                //otherwise append the results found
+                else {
+                    var stats = eval(msg)["d"].replace(/['"]+/g, '').split("|");
+                    $('#queue_count').text(stats[0]);
+                    $('#table_count').text(stats[1]);
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    }
     //function to update chart
     function updateChart() {
         $.ajax({
@@ -86,7 +154,7 @@
                     for (var i in eval(msg)["d"]) {
                         var stats = eval(msg)["d"][i].split("|");
                         cpuData.push(stats[0]);
-                        memData.push(stats[1]/100);
+                        memData.push(stats[1] / 100);
                     }
 
                     config.data.datasets = [{
@@ -101,7 +169,7 @@
                         backgroundColor: '#008000',
                         borderColor: '#008000',
                         data: memData,
-                        }];
+                    }];
 
                     window.myLineChart.update();
                 }
@@ -112,10 +180,6 @@
             }
         });
     }
-
-    var cpuInitData = [];
-    var memInitData = [];
-
     var config = {
         type: 'line',
         data: {
@@ -278,6 +342,36 @@
                     var index = 1;
                     for (var i in eval(msg)["d"]) {
                         $("#performance_results").append("<li class='list-group-item'>" + eval(msg)["d"][i] + "</li>");
+                        index++;
+                    }
+                }
+
+            },
+            error: function (msg) {
+                console.log("error: " + msg);
+            }
+        });
+    };
+    //function to send errors table request
+    function errorRequest() {
+
+        $.ajax({
+            type: "POST",
+            url: "Admin.asmx/GetErrors",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                console.log("Success");
+                $('#error_results').empty();
+                //if results are not returned 
+                if (!eval(msg)["d"]) {
+                    $("#error_results").append("<p> No results found </p>");
+                }
+                //otherwise append the results found
+                else {
+                    var index = 1;
+                    for (var i in eval(msg)["d"]) {
+                        $("#error_results").append("<li class='list-group-item'>" + eval(msg)["d"][i] + "</li>");
                         index++;
                     }
                 }
